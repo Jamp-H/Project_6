@@ -105,11 +105,11 @@ def main():
     fold_vec = np.random.permutation(np.tile(fold_ids,len(y_vec))[:len(y_vec)])
 
     for fold_num in fold_ids:
-        test_mat = 
-        test_vec =
+        test_mat = X_sc[fold_num == fold_vec]
+        test_vec = y_vec[fold_num == fold_vec]
 
-        train_mat =
-        train_vec =
+        train_mat = X_sc[fold_num != fold_vec]
+        train_vec = y_vec[fold_num != fold_vec]
 
 
 
