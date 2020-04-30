@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import tensorflow_docs as tfdocs
 import tensorflow_docs.modeling
 import tensorflow_docs.plots
+import numpy as np
 
 ## TODO:
 ## Edit convention to work with zip.train data set
@@ -83,3 +84,42 @@ def run_single_layered_NN(X_mat, y_vec, val_data, hidden_layers, num_epochs, dat
 
 
     return model_data_list
+
+
+def main():
+
+    np.random.seed(0)
+
+    # Get data in matrix format
+    zip_train = np.genfromtxt("zip.train", delimiter=" ")
+
+    X_sc = getNormX(zip_train)
+
+    y_vec = getY(zip_train)
+
+    # reshape so each row of matrix is a 16x16 matrix
+    X_sc = np.reshape(X_sc[:,:], (X_sc.shape[0], 16, 16))
+
+    fold_ids = np.arange(5)
+
+    fold_vec = np.random.permutation(np.tile(fold_ids,len(y_vec))[:len(y_vec)])
+
+    for fold_num in fold_ids:
+        test_mat = 
+        test_vec =
+
+        train_mat =
+        train_vec =
+
+
+
+
+    # Split data up into X_mat and y_vec
+    zip_test = zip_train[1:10]
+
+
+
+
+
+
+main()
