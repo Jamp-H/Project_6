@@ -82,7 +82,8 @@ def main():
 
     # initilize variables
     num_epochs = 50
-    hidden_values = [270, 270, 128]
+    hidden_values_dense = [270, 270, 128]
+    hidden_values_convolutional = [6272, 9216, 128]
 
     np.random.seed(0)
 
@@ -109,15 +110,8 @@ def main():
         x_test = X_sc[fold_num == fold_vec]
         y_test = y_vec[fold_num == fold_vec]
         print(np.size(x_train,1))
-        run_NN(x_train, y_train, hidden_values, num_epochs, "Training")
+        run_NN(x_train, y_train, hidden_values_convolutional, num_epochs, "Training")
 
-
-
-
-
-
-    # Split data up into X_mat and y_vec
-    zip_test = zip_train[1:10]
 
 
 
