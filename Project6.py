@@ -40,23 +40,38 @@ def getY(data):
 def run_NN(X_mat, y_vec, hidden_value_list , num_epochs, data_set):
     # set model variable to keep track on which number model is being ran
 
-# create a neural network with 1 hidden layer
-
+    '''
     # set model for single layered NN
     model = keras.Sequential([
     keras.layers.Flatten(input_shape=(np.size(X_mat, 1), )), # input layer
     keras.layers.Dense(hidden_value_list[0], activation='relu'), # hidden layer
     keras.layers.Dense(hidden_value_list[1], activation='relu'), # hidden layer
     keras.layers.Dense(hidden_value_list[2], activation='relu'), # hidden layer
+    keras.layers.Dense(hidden_value_list[3], activation='relu'), # hidden layer
+    keras.layers.Dense(10, activation='softmax') # output layer
+    ])
+    '''
+    # create model
+    model = keras.Sequential([
+    keras.layers.Conv2D(filters = 32, kernel_size = (3,3), activation = 'relu',
+                        input_shape = (16,16,1) ),
+    keras.layers.Conv2D(filters = 64, kernel_size = (3,3), activation = 'relu'),
+    keras.layers.MaxPool2D(pool_size = (2,2)),
+    keras.layers.Dropout(rate = 0.25),
+    keras.layers.Flatten(),
+    keras.layers.Dense(hidden_value_list[0], activation='relu'), # hidden layer
+    keras.layers.Dense(hidden_value_list[1], activation='relu'), # hidden layer
+    keras.layers.Dense(hidden_value_list[2], activation='relu'), # hidden layer
+    keras.layers.Dense(hidden_value_list[3], activation='relu'),  # hidden layer
     keras.layers.Dense(10, activation='softmax') # output layer
     ])
 
-    # compile the models
+    # compile the model
     model.compile(optimizer='adadelta',
                   loss= "sparse_categorical_crossentropy",
                   metrics=['accuracy'])
 
-    # fit the models
+    # fit the model
     print(f"\nModel {data_set}")
     print("==============================================")
     model_data = model.fit(
@@ -72,8 +87,8 @@ def run_NN(X_mat, y_vec, hidden_value_list , num_epochs, data_set):
 def main():
 
     # initilize variables
-    num_epochs = 100
-    hidden_values_dense = [270, 270, 128]
+    num_epochs = 30
+    hidden_values_dense = [784, 270, 270, 128]
     hidden_values_convolutional = [6272, 9216, 128]
 
     np.random.seed(2)
@@ -88,7 +103,7 @@ def main():
     print(y_vec.shape)
 
     # reshape so each row of matrix is a 16x16 matrix
-    # X_sc = np.reshape(X_sc[:,:], (X_sc.shape[0], 16, 16))
+    X_sc = np.reshape(X_sc[:,:], (X_sc.shape[0], 16, 16, 1))
 
     fold_ids = np.arange(5)
 
