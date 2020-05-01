@@ -23,8 +23,7 @@ import numpy as np
 
 def getNormX(data):
     xValuesUnscaled = data[:,1:]
-    X_sc = scale(xValuesUnscaled)
-    return X_sc
+    return xValuesUnscaled
 
 
 def getY(data):
@@ -46,10 +45,10 @@ def run_NN(X_mat, y_vec, hidden_value_list , num_epochs, data_set):
     # set model for single layered NN
     model = keras.Sequential([
     keras.layers.Flatten(input_shape=(np.size(X_mat, 1), )), # input layer
-    keras.layers.Dense(hidden_value_list[0], activation='relu', use_bias=False), # hidden layer
-    keras.layers.Dense(hidden_value_list[1], activation='relu', use_bias=False), # hidden layer
-    keras.layers.Dense(hidden_value_list[2], activation='relu', use_bias=False), # hidden layer
-    keras.layers.Dense(10, activation='softmax', use_bias=False) # output layer
+    keras.layers.Dense(hidden_value_list[0], activation='relu'), # hidden layer
+    keras.layers.Dense(hidden_value_list[1], activation='relu'), # hidden layer
+    keras.layers.Dense(hidden_value_list[2], activation='relu'), # hidden layer
+    keras.layers.Dense(10, activation='softmax') # output layer
     ])
 
     # compile the models
@@ -67,16 +66,13 @@ def run_NN(X_mat, y_vec, hidden_value_list , num_epochs, data_set):
                                 batch_size=128,
                                 validation_split=0.2)
 
-
-
-
     return model_data
 
 
 def main():
 
     # initilize variables
-    num_epochs = 30
+    num_epochs = 100
     hidden_values_dense = [270, 270, 128]
     hidden_values_convolutional = [6272, 9216, 128]
 
