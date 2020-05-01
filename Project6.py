@@ -17,11 +17,7 @@ import tensorflow_docs.plots
 import numpy as np
 
 ## TODO:
-## Edit convention to work with zip.train data set
-## load zip.train data set
-## split data set into subtrain and validataion
 ## compare trained models
-## Make 3 moldels: BaseLine, Conventional, dense
 ## create function for baseLine and Dense model
 ## See DOC
 
@@ -69,7 +65,6 @@ def run_NN(X_mat, y_vec, hidden_value_list , num_epochs, data_set):
                                 y=y_vec,
                                 epochs=num_epochs,
                                 batch_size=128,
-                                verbose=2,
                                 validation_split=0.2)
 
 
@@ -81,11 +76,11 @@ def run_NN(X_mat, y_vec, hidden_value_list , num_epochs, data_set):
 def main():
 
     # initilize variables
-    num_epochs = 50
+    num_epochs = 30
     hidden_values_dense = [270, 270, 128]
     hidden_values_convolutional = [6272, 9216, 128]
 
-    np.random.seed(0)
+    np.random.seed(2)
 
     # Get data in matrix format
     zip_train = np.genfromtxt("zip.train", delimiter=" ")
@@ -109,13 +104,15 @@ def main():
 
         x_test = X_sc[fold_num == fold_vec]
         y_test = y_vec[fold_num == fold_vec]
-        print(np.size(x_train,1))
-        run_NN(x_train, y_train, hidden_values_convolutional, num_epochs, "Training")
 
+        dense_model = run_NN(x_train, y_train, hidden_values_dense, num_epochs, "Training")
+        # convol_model = run_NN(x_train, y_train, hidden_values_convolutional, num_epochs, "Training")
 
+        history_dense = dense_model.history
 
+        val_loss_index = history_dense["val_loss"].index(min(history_dense["val_loss"])) + 1
 
-
+        print(val_loss_index)
 
 
 main()
