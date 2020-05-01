@@ -23,7 +23,8 @@ import numpy as np
 
 def getNormX(data):
     xValuesUnscaled = data[:,1:]
-    return xValuesUnscaled
+    x_sc = xValuesUnscaled/255
+    return x_sc
 
 
 def getY(data):
@@ -57,7 +58,6 @@ def run_NN(X_mat, y_vec, hidden_value_list , num_epochs, data_set):
                         input_shape = (16,16,1) ),
     keras.layers.Conv2D(filters = 64, kernel_size = (3,3), activation = 'relu'),
     keras.layers.MaxPool2D(pool_size = (2,2)),
-    keras.layers.Dropout(rate = 0.25),
     keras.layers.Flatten(),
     keras.layers.Dense(hidden_value_list[0], activation='relu'), # hidden layer
     keras.layers.Dense(hidden_value_list[1], activation='relu'), # hidden layer
@@ -68,7 +68,7 @@ def run_NN(X_mat, y_vec, hidden_value_list , num_epochs, data_set):
 
     # compile the model
     model.compile(optimizer='adadelta',
-                  loss= "sparse_categorical_crossentropy",
+                  loss= "categorical_crossentropy",
                   metrics=['accuracy'])
 
     # fit the model
@@ -87,7 +87,7 @@ def run_NN(X_mat, y_vec, hidden_value_list , num_epochs, data_set):
 def main():
 
     # initilize variables
-    num_epochs = 30
+    num_epochs = 50
     hidden_values_dense = [784, 270, 270, 128]
     hidden_values_convolutional = [6272, 9216, 128]
 
@@ -99,8 +99,6 @@ def main():
     X_sc = getNormX(zip_train)
 
     y_vec = getY(zip_train)
-
-    print(y_vec.shape)
 
     # reshape so each row of matrix is a 16x16 matrix
     X_sc = np.reshape(X_sc[:,:], (X_sc.shape[0], 16, 16, 1))
@@ -115,6 +113,9 @@ def main():
 
         x_test = X_sc[fold_num == fold_vec]
         y_test = y_vec[fold_num == fold_vec]
+
+        y_train = keras.utils.to_categorical(y_train, num_classes = 10)
+        y_test = keras.utils.to_categorical(y_test, num_classes = 10)
 
         dense_model = run_NN(x_train, y_train, hidden_values_dense, num_epochs, "Training")
         # convol_model = run_NN(x_train, y_train, hidden_values_convolutional, num_epochs, "Training")
