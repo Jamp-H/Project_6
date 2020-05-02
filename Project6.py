@@ -23,8 +23,7 @@ import numpy as np
 
 def getNormX(data):
     xValuesUnscaled = data[:,1:]
-    x_sc = xValuesUnscaled/255
-    return x_sc
+    return xValuesUnscaled
 
 
 def getY(data):
