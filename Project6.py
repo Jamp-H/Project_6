@@ -15,6 +15,7 @@ import tensorflow_docs as tfdocs
 import tensorflow_docs.modeling
 import tensorflow_docs.plots
 import numpy as np
+from statistics import mean
 
 ## TODO:
 ## Plotting
@@ -141,7 +142,7 @@ def main():
         baseline_model = beseline_model_data[1]
 
         history_dense = dense_model_data.history
-        history_baseline = baseline_model_data.history
+        history_base = baseline_model_data.history
 
         best_epochs = np.argmin(history_dense["val_loss"]) + 1
 
@@ -151,19 +152,20 @@ def main():
         train_model = train_set_model[1]
 
         dense_accu = train_model.evaluate(x_test, y_test)
+        base_accu = baseline_model.evaluate(x_test, y_test)
 
         dense_fold_data = {
-                  "accu": dense_accu,
-                  "Fold": fold_num + 1,
-                  "history": history_dense
+                  "dense_accu": dense_accu,
+                  "dense_Fold": fold_num + 1,
+                  "dense_history": history_dense
                 }
 
         model_fold_data.append(dense_fold_data)
 
         baseline_fold_data = {
-                  "base_accu": dense_accu,
+                  "base_accu": base_accu,
                   "base_Fold": fold_num + 1,
-                  "base_history": history_dense
+                  "base_history": history_base
                 }
 
         model_fold_data.append(baseline_fold_data)
@@ -172,12 +174,17 @@ def main():
     fold_num = 0
     color_array = ['red', 'blue', 'orange', 'green', 'cyan']
     for model in model_fold_data:
-        plt.plot(np.arange(len(model_fold_data)), model['history']['val_accuracy'], color=color_array[color_index], label='dense fold {fold_num}')
-        min_y = np.amin(model['history']['val_accuracy'])
-        min_x = np.argmin(model['history']['val_accuracy'])
-        plt.plot(min_x, min_y, marker='o', color=color_array[color_index])
+        if fold_num%2 == 0:
+            name = "dense"
+        else:
+            name = "base"
+        plt.plot(mean(model[F'{name}_history']['val_accuracy']), fold_num, marker='.' , color=color_array[color_index], label=F'{name} fold {fold_num}')
         color_index = (color_index + 1) % len(color_array)
         fold_num = fold_num + 1
+    plt.legend()
 
-    plt.show()
+    plt.savefig("Accuracy")
+
+
+
 main()
