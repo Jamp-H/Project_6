@@ -23,8 +23,7 @@ import numpy as np
 
 def getNormX(data):
     xValuesUnscaled = data[:,1:]
-    x_sc = xValuesUnscaled/255
-    return x_sc
+    return xValuesUnscaled
 
 
 def getY(data):
@@ -65,8 +64,8 @@ def run_NN(X_mat, y_vec, hidden_value_list , num_epochs, data_set, split):
     keras.layers.Dense(hidden_value_list[3], activation='relu'),  # hidden layer
     keras.layers.Dense(10, activation='softmax') # output layer
     ])
-    
-    
+
+
     # compile the model
     model.compile(optimizer='adadelta',
                   loss= "categorical_crossentropy",
@@ -85,12 +84,20 @@ def run_NN(X_mat, y_vec, hidden_value_list , num_epochs, data_set, split):
     return model_data, model
 
 
+def baseline_pred(y_vec):
+    baseline_pred_vec = np.zeros(len(y_vec)).reshape(len(y_vec),1)
+    unique_num, counts = np.unique(y_vec, return_counts=True)
+    if(counts[1] > counts[0]):
+        return baseline_pred_vec.ones(len(y_vec)).reshape(len(y_vec),1)
+    return baseline_pred_vec
+
+
 def main():
 
     # initilize variables
-    num_epochs = 10
+    num_epochs = 20
     hidden_values_dense = [784, 270, 270, 128]
-    hidden_values_convolutional = [6272, 9216, 128]
+    hidden_values_convolutional = [784, 6272, 9216, 128]
 
     np.random.seed(2)
 
@@ -104,12 +111,16 @@ def main():
     # reshape so each row of matrix is a 16x16 matrix
     X_sc = np.reshape(X_sc[:,:], (X_sc.shape[0], 16, 16, 1))
 
-    fold_ids = np.arange(2)
+    fold_ids = np.arange(5)
 
     fold_vec = np.random.permutation(np.tile(fold_ids,len(y_vec))[:len(y_vec)])
-    
+
+    baseline_vec = baseline_pred(y_vec)
+
+    print(baseline_vec)
+
     model_fold_data = []
-    
+
     for fold_num in fold_ids:
         x_train = X_sc[fold_num != fold_vec]
         y_train = y_vec[fold_num != fold_vec]
@@ -120,8 +131,11 @@ def main():
         y_train = keras.utils.to_categorical(y_train, num_classes = 10)
         y_test = keras.utils.to_categorical(y_test, num_classes = 10)
 
-        model_data = run_NN(x_train, y_train, hidden_values_dense, num_epochs, "Cross Fold Training", 0.2)
-        #convol_model = run_NN(x_train, y_train, hidden_values_convolutional, num_epochs, "Training")
+        beseline_model_data = run_NN(x_train, y_train, hidden_values_dense,
+                                num_epochs, "Baseline Cross Fold Training", 0.2)
+        model_data = run_NN(x_train, y_train, hidden_values_dense,
+                                num_epochs, "Cross Fold Training", 0.2)
+        # convol_model = run_NN(x_train, y_train, hidden_values_convolutional, num_epochs, "Training". 0.2)
 
         dense_model_data = model_data[0]
         dense_model = model_data[1]
@@ -129,26 +143,26 @@ def main():
         history_dense = dense_model_data.history
 
         best_epochs = np.argmin(history_dense["val_loss"]) + 1
-        
+
         train_set_model = run_NN(x_train, y_train, hidden_values_dense, best_epochs, "Training Set", 0.0)
-        
+
         train_model_data = train_set_model[0]
         train_model = train_set_model[1]
-        
+
         dense_accu = train_model.evaluate(x_test, y_test)
-        
+
         dense_fold_data = {
                   "accu": dense_accu,
                   "Fold": fold_num + 1,
                   "history": history_dense
                 }
-        
+
         model_fold_data.append(dense_fold_data)
-    
+
     color_index = 0
     fold_num = 0
-    color_array = ['red', 'blue', 'orenge', 'green', 'yellow']
-    
+    color_array = ['red', 'blue', 'orange', 'green', 'yellow']
+    print(len(model_fold_data))
     for model in model_fold_data:
         plt.plot(np.arange(best_epochs), model['history']['val_loss'], color=color_array[color_index], label='dense fold {fold_num}')
         min_y = np.amin(model['history']['val_loss'])
@@ -156,6 +170,6 @@ def main():
         plt.plot(min_x, min_y, marker='o', color=color_array[color_index])
         color_index = (color_index + 1) % len(color_array)
         fold_num = fold_num + 1
-        
+
     plt.show()
 main()
