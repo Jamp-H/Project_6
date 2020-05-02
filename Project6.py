@@ -17,9 +17,7 @@ import tensorflow_docs.plots
 import numpy as np
 
 ## TODO:
-## compare trained models
-## create function for baseLine and Dense model
-## See DOC
+## Plotting
 
 def getNormX(data):
     xValuesUnscaled = data[:,1:]
@@ -87,8 +85,9 @@ def run_NN(X_mat, y_vec, hidden_value_list , num_epochs, data_set, split):
 def baseline_pred(y_vec):
     baseline_pred_vec = np.zeros(len(y_vec)).reshape(len(y_vec),1)
     unique_num, counts = np.unique(y_vec, return_counts=True)
-    if(counts[1] > counts[0]):
-        return baseline_pred_vec.ones(len(y_vec)).reshape(len(y_vec),1)
+    counts = list(counts)
+    if(counts.index(max(counts)) > 0):
+        return baseline_pred_vec.ones(len(y_vec)).reshape(len(y_vec),1) * counts.index(max(counts))
     return baseline_pred_vec
 
 
@@ -117,8 +116,6 @@ def main():
 
     baseline_vec = baseline_pred(y_vec)
 
-    print(baseline_vec)
-
     model_fold_data = []
 
     for fold_num in fold_ids:
@@ -140,7 +137,11 @@ def main():
         dense_model_data = model_data[0]
         dense_model = model_data[1]
 
+        baseline_model_data = beseline_model_data[0]
+        baseline_model = beseline_model_data[1]
+
         history_dense = dense_model_data.history
+        history_baseline = baseline_model_data.history
 
         best_epochs = np.argmin(history_dense["val_loss"]) + 1
 
@@ -159,14 +160,21 @@ def main():
 
         model_fold_data.append(dense_fold_data)
 
+        baseline_fold_data = {
+                  "base_accu": dense_accu,
+                  "base_Fold": fold_num + 1,
+                  "base_history": history_dense
+                }
+
+        model_fold_data.append(baseline_fold_data)
+
     color_index = 0
     fold_num = 0
-    color_array = ['red', 'blue', 'orange', 'green', 'yellow']
-    print(len(model_fold_data))
+    color_array = ['red', 'blue', 'orange', 'green', 'cyan']
     for model in model_fold_data:
-        plt.plot(np.arange(best_epochs), model['history']['val_loss'], color=color_array[color_index], label='dense fold {fold_num}')
-        min_y = np.amin(model['history']['val_loss'])
-        min_x = np.argmin(model['history']['val_loss'])
+        plt.plot(np.arange(len(model_fold_data)), model['history']['val_accuracy'], color=color_array[color_index], label='dense fold {fold_num}')
+        min_y = np.amin(model['history']['val_accuracy'])
+        min_x = np.argmin(model['history']['val_accuracy'])
         plt.plot(min_x, min_y, marker='o', color=color_array[color_index])
         color_index = (color_index + 1) % len(color_array)
         fold_num = fold_num + 1
